@@ -1,26 +1,47 @@
+# BUILD CONTEXT IS THE REPO ROOT, not this directory:
+#   docker build -f containers/esm2-scorer/Dockerfile.naive -t esm2-naive .
+#
 # WEDNESDAY ARTIFACT. Deliberately wrong in ways you will measure.
 # Keep this file in the repo forever; it is the before-picture.
 #
-# Three defects, in order of how much time they cost you:
-#   1. COPY . . before pip install  -> any code edit reinstalls torch (~4 min)
+# Two defects you will feel today:
+#   1. COPY . . before pip install  -> any code edit reinstalls torch
 #   2. weights downloaded after deps -> any dep change re-pulls 2.5 GB
+# Plus one you will fix on Friday:
 #   3. single stage on -devel base   -> ships nvcc and headers to production
 #
-# Build it, time it, break the cache, time it again, then fix one defect at a
-# time and re-time. Write all six numbers in learning-log.md.
+# Build it, time it, break the cache, time it again. Three numbers in your notes.
 
 FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y python3 python3-pip git curl
+
+# Not one of the deliberate defects -- a real fix. nvidia/cuda images ship an apt
+# source for developer.download.nvidia.com whose signing key NVIDIA has rotated.
+# We install nothing from that repo (PyTorch comes from pip), so removing the
+# source list avoids a class of apt failure for free.
+RUN rm -f /etc/apt/sources.list.d/cuda*.list /etc/apt/sources.list.d/nvidia-ml.list \
+    && apt-get update && apt-get install -y python3 python3-pip git curl
 
 WORKDIR /app
+
+# DEFECT 1: the whole repo, copied before anything is installed. Touch any file
+# and every layer below this one is invalidated.
 COPY . .
 
-RUN pip3 install --extra-index-url https://download.pytorch.org/whl/cu124 -r requirements.txt
-RUN pip3 install -e .
+# Paths are relative to the repo root, because that is what got copied to /app.
+RUN pip3 install --extra-index-url https://download.pytorch.org/whl/cu124 \
+        -r containers/esm2-scorer/requirements.txt
 
+# Two packages: itevi_core (shared identity/provenance code, used by every Layer 1
+# container) and esm2_scorer itself. The scorer imports the former, so both must
+# be installed or `esm2-score` fails at import time rather than at build time.
+RUN pip3 install -e ./shared
+RUN pip3 install -e ./containers/esm2-scorer
+
+# DEFECT 2: 2.5 GB of weights fetched AFTER the dependency install, so any change
+# to requirements.txt re-downloads them.
 ENV TORCH_HOME=/opt/torch
-RUN python3 scripts/fetch_weights.py
+RUN python3 containers/esm2-scorer/fetch_weights.py
 
 CMD ["esm2-score", "--help"]

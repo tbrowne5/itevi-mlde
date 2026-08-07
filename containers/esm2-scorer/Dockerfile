@@ -13,7 +13,9 @@
 FROM nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# See Dockerfile.naive for why the cuda source list is removed first.
+RUN rm -f /etc/apt/sources.list.d/cuda*.list /etc/apt/sources.list.d/nvidia-ml.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
         python3 python3-venv python3-dev build-essential curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -52,7 +54,8 @@ RUN pip install --no-cache-dir --no-deps /src
 FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN rm -f /etc/apt/sources.list.d/cuda*.list /etc/apt/sources.list.d/nvidia-ml.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
         python3 ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
