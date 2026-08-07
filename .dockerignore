@@ -1,0 +1,16 @@
+# Build context hygiene. Without this, `docker build` ships model weights,
+# scratch parquet, and .git to the daemon on every single build.
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+.venv
+venv
+out/
+scratch/
+data/*.parquet
+data/*.pt
+*.log
+.DS_Store
+.pytest_cache
+notebooks/

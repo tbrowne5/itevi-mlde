@@ -1,0 +1,16 @@
+# macOS / Apple Silicon exploration environment.
+#
+# Deliberately NOT the same file as requirements.txt. The container pins CUDA
+# wheels from download.pytorch.org; this pins plain PyPI wheels with MPS.
+#
+# Scores produced here are for exploration only. fp32 on MPS and fp32 on CUDA
+# agree to ~1e-4 per position, which is fine for "does the ranking look sane"
+# and NOT fine as the Week 3 anchor that Week 10 must reproduce. The anchor is
+# whatever comes out of the container on the server. Never quote an MPS number
+# in the PI memo.
+fair-esm==2.0.0
+torch==2.4.1
+numpy==1.26.4
+pandas==2.2.2
+pyarrow==16.1.0
+PyYAML==6.0.1

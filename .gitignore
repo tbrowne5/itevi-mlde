@@ -1,0 +1,6 @@
+out/
+scratch/
+*.parquet
+*.pt
+__pycache__/
+.venv/

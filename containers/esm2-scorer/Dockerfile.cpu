@@ -1,0 +1,73 @@
+# BUILD CONTEXT IS THE REPO ROOT, not this directory:
+#   docker build -f containers/esm2-scorer/Dockerfile.cpu -t <tag> .
+# The context must include shared/ and config/. See docs/conventions.md.
+# LOCAL / APPLE SILICON IMAGE. Builds and runs natively on arm64.
+#
+# Purpose: learn every Docker concept in Week 1 -- layers, cache ordering,
+# multi-stage, image size -- without needing a GPU or amd64. The science it can
+# actually do is real: `--mode marginal` over the whole 1024-member library is
+# 11 forward passes total (10 masked positions + 1 WT pass) and runs in well
+# under a minute on CPU here.
+#
+# What it CANNOT do: full PLL at any reasonable speed. That is the GPU image.
+
+# ---------- builder ----------
+FROM python:3.11-slim-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl ca-certificates build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# CPU-only torch. On arm64 the default PyPI wheel is already CPU-only; the
+# explicit index keeps amd64 builds from pulling 2 GB of CUDA libraries.
+COPY requirements-cpu.txt /tmp/requirements-cpu.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir \
+        --extra-index-url https://download.pytorch.org/whl/cpu \
+        -r /tmp/requirements-cpu.txt
+
+ENV TORCH_HOME=/opt/torch
+RUN mkdir -p /opt/torch/hub/checkpoints \
+    && curl -fsSL -o /opt/torch/hub/checkpoints/esm2_t33_650M_UR50D.pt \
+        https://dl.fbaipublicfiles.com/fair-esm/models/esm2_t33_650M_UR50D.pt \
+    && curl -fsSL -o /opt/torch/hub/checkpoints/esm2_t33_650M_UR50D-contact-regression.pt \
+        https://dl.fbaipublicfiles.com/fair-esm/regression/esm2_t33_650M_UR50D-contact-regression.pt \
+    && sha256sum /opt/torch/hub/checkpoints/*.pt > /opt/torch/CHECKSUMS
+
+# shared first: it changes less often than the container's own source
+COPY shared /src/shared
+RUN pip install --no-cache-dir --no-deps /src/shared
+
+COPY containers/esm2-scorer/pyproject.toml /src/pyproject.toml
+COPY containers/esm2-scorer/src /src/src
+RUN pip install --no-cache-dir --no-deps /src
+
+# ---------- runtime ----------
+FROM python:3.11-slim-bookworm AS runtime
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /opt/torch /opt/torch
+
+ENV PATH="/opt/venv/bin:$PATH" \
+    TORCH_HOME=/opt/torch \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    OMP_NUM_THREADS=8
+
+ARG GIT_SHA=unset
+ENV GIT_SHA=$GIT_SHA
+# IMAGE_DIGEST is deliberately NOT a build arg -- the registry assigns it on
+# push, so at build time there is nothing to bake. Injected with -e at run time.
+
+COPY config /config
+
+RUN useradd -m -u 1000 scorer
+USER scorer
+WORKDIR /work
+
+ENTRYPOINT ["esm2-score"]
+CMD ["--help"]

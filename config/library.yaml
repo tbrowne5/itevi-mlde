@@ -1,0 +1,66 @@
+# I-TevI Block 2 library + analysis window
+#
+# THREE DISTINCT SETS. Do not conflate them.
+#
+#   analysis_window  what gets scored, profiled, and reported over.
+#                    Cheap to widen. Currently 23-40.
+#   positions        what actually VARIES in the retrospective library.
+#                    The 10 Tev/Bmo differing sites, all within 24-39.
+#   fixed            catalytic residues. Scored, never designable.
+#                    Handed to ProteinMPNN/LigandMPNN as fixed in Week 3+.
+#
+# Note that 40 (H40) is BOTH in the analysis window and in `fixed`. That is
+# intentional and it is the point of widening the window: H40 is the internal
+# positive control for whether ESM-2 has learned this active site at all.
+
+parent: I-TevI
+numbering: 1-indexed
+source: "Loedige et al., Nucleic Acids Res 54(1):gkaf1430 (2026); PMC12774661"
+
+analysis_window:
+  start: 23
+  end: 40
+  rationale: >
+    Block 2 proper is 24-39. Positions 23 and 40 sit at the block 1/2 and 2/3
+    boundaries and are not themselves in a distinct block. Included for
+    profiling and for the Layer 4 designable set. Widening the window costs one
+    forward pass per position and nothing else.
+
+# --- the mutable set -----------------------------------------------------
+# FILL IN FROM THE PAPER. Six positions are named in the handoff summary;
+# four are not. `tev` must match the WT FASTA or load fails.
+#
+# BEFORE FILLING THIS IN: check whether I-TevI and I-BmoI differ at 23 or 40.
+#   - If they do NOT differ, there is nothing to vary and the library stays 2^10.
+#   - If they DO differ, the paper excluded them from the 1024 deliberately.
+#     Find out why before adding them. A 2^12 library is a different experiment.
+positions:
+  - {resi: 30, tev: "?", bmo: "R"}   # R30 named among selected residues
+  - {resi: 33, tev: "?", bmo: "K"}   # K33
+  - {resi: 36, tev: "?", bmo: "E"}   # E36
+  - {resi: 37, tev: "?", bmo: "K"}   # K37
+  - {resi: 38, tev: "?", bmo: "G"}   # G38
+  - {resi: 39, tev: "?", bmo: "?"}   # UNRESOLVED: "C39R" vs "C39" -- DESIGN.md Q1
+  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
+  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
+  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
+  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
+
+# --- never designable ----------------------------------------------------
+fixed:
+  - {resi: 27, aa: "R", role: catalytic}
+  - {resi: 40, aa: "H", role: catalytic, note: "inside analysis_window"}
+  - {resi: 75, aa: "E", role: catalytic, note: "outside analysis_window"}
+
+# --- retrospective benchmark labels -------------------------------------
+benchmark_hits:
+  AAACG:
+    - {name: "C39R", positions: [39]}
+  TAACG:
+    - {name: "RKEC",   positions: [30, 33, 36, 39]}
+    - {name: "RKEKC",  positions: [30, 33, 36, 37, 39]}
+    - {name: "RKEKGC", positions: [30, 33, 36, 37, 38, 39]}
+  GAACG:
+    - {name: "RKEC",   positions: [30, 33, 36, 39]}
+    - {name: "RKEKC",  positions: [30, 33, 36, 37, 39]}
+    - {name: "RKEKGC", positions: [30, 33, 36, 37, 38, 39]}
