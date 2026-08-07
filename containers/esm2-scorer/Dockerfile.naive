@@ -36,8 +36,8 @@ RUN pip3 install --extra-index-url https://download.pytorch.org/whl/cu124 \
 # Two packages: itevi_core (shared identity/provenance code, used by every Layer 1
 # container) and esm2_scorer itself. The scorer imports the former, so both must
 # be installed or `esm2-score` fails at import time rather than at build time.
-RUN pip3 install -e ./shared
-RUN pip3 install -e ./containers/esm2-scorer
+RUN pip3 install ./shared
+RUN pip3 install ./containers/esm2-scorer
 
 # DEFECT 2: 2.5 GB of weights fetched AFTER the dependency install, so any change
 # to requirements.txt re-downloads them.
