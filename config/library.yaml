@@ -35,16 +35,16 @@ analysis_window:
 #   - If they DO differ, the paper excluded them from the 1024 deliberately.
 #     Find out why before adding them. A 2^12 library is a different experiment.
 positions:
-  - {resi: 30, tev: "?", bmo: "R"}   # R30 named among selected residues
-  - {resi: 33, tev: "?", bmo: "K"}   # K33
-  - {resi: 36, tev: "?", bmo: "E"}   # E36
-  - {resi: 37, tev: "?", bmo: "K"}   # K37
-  - {resi: 38, tev: "?", bmo: "G"}   # G38
-  - {resi: 39, tev: "?", bmo: "?"}   # UNRESOLVED: "C39R" vs "C39" -- DESIGN.md Q1
-  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
-  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
-  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
-  - {resi: 0,  tev: "?", bmo: "?"}   # TODO from paper
+  - {resi: 24, tev: "F", bmo: "C"}   # R30 named among selected residues
+  - {resi: 26, tev: "K", bmo: "S"}   # K33
+  - {resi: 28, tev: "W", bmo: "L"}   # E36
+  - {resi: 30, tev: "R", bmo: "V"}   # K37
+  - {resi: 33, tev: "K", bmo: "R"}   # G38
+  - {resi: 34, tev: "D", bmo: "N"}   # UNRESOLVED: "C39R" vs "C39" -- DESIGN.md Q1
+  - {resi: 36,  tev: "E", bmo: "K"}   # TODO from paper
+  - {resi: 37,  tev: "K", bmo: "N"}   # TODO from paper
+  - {resi: 38,  tev: "G", bmo: "N"}   # TODO from paper
+  - {resi: 39,  tev: "C", bmo: "R"}   # TODO from paper
 
 # --- never designable ----------------------------------------------------
 fixed:
