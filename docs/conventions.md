@@ -1,6 +1,27 @@
 # Conventions
 
-Decisions that are cheap now and expensive in October. Each one exists because
+> **Week 1: you don't need most of this.** The only part that matters right now
+> is the table immediately below — where a new file goes. Everything after §1 is
+> for when you add a second container or start writing pipeline code.
+
+## Quick answer: where does this file go?
+
+| I'm making... | It goes in |
+|---|---|
+| a new Layer 1 tool | `containers/<tool>-scorer/` |
+| code two containers both need | `shared/src/itevi_core/` |
+| a parent sequence | `config/parents/` |
+| a library or substrate-panel definition | `config/` |
+| a Parquet, FASTA, model weights, anything big | `$ITEVI_SCRATCH` — **never the repo** |
+| a note about what I did or what broke | `itevi-notes` vault |
+| a decision others must follow | `docs/` here |
+| a scratch script I'll run once | `/tmp`, and delete it |
+
+If it's not in this table, ask whether it needs to exist yet.
+
+---
+
+Decisions that are cheap now and expensive in October. Each exists because
 something downstream in the 24-week plan breaks without it.
 
 ---
@@ -40,19 +61,34 @@ a version-compatibility matrix maintained by one person. In one repo it is one
 commit. The usual argument for splitting — independent release cadence across
 teams — does not apply to a solo computational lead.
 
-### `<username>-mlde-learning` — the portfolio repo (public-safe)
+### `itevi-notes` — the working vault (private, internal)
 
-This is the repo the Week 0 plan names, and it is **not** the project repo.
+An Obsidian vault with git turned on. **Not a second codebase** — a notes folder
+with version history. If you find yourself building tooling in it, that tooling
+belongs in `itevi-mlde`.
 
-- `learning-log.md`, daily entries from Week 1
-- write-ups, diagrams, notes, the Week 21 portfolio pass
-- sanitised snippets, never proprietary sequences or unpublished results
+The dividing line is not public/private; both repos are internal and stay that
+way. It is **artifact vs. process**:
 
-**Why separate.** The project brief requires all IP be clean for commercial use,
-and Week 21 schedules a public write-up "if IP allows". If the learning log lives
-inside the private repo, publishing means auditing and scrubbing a year of
-history under time pressure. Separate from day one, and the question never
-arises. Link the two by date, never by import.
+| `itevi-notes` | `itevi-mlde/docs/` |
+|---|---|
+| daily log, what broke and why | conventions, DESIGN.md, data contract |
+| paper notes, half-formed ideas | the runbook |
+| debugging narratives, dead ends | schemas |
+| meeting notes | code, config, Dockerfiles |
+| timings as measured | the *decided* value, in the justfile |
+
+The test: **would someone joining the project need to read this to act
+correctly?** Yes → `itevi-mlde`. No, it is working memory → `itevi-notes`.
+
+Kept separate for three mundane reasons, none of them IP: Obsidian wants to own
+its folder root; note commits would spam the code repo's history and fire CI on
+every typo; and half-formed thinking should not land in front of the PI when they
+get repo access.
+
+When it is eventually time to compile a "what I did" summary for a move, the
+daily notes are the raw material. That is a later extraction job, not a reason to
+structure the vault for it now.
 
 ---
 

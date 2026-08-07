@@ -30,8 +30,8 @@ allows", while the project brief requires clean commercial IP. A log inside the
 private repo means scrubbing a year of history under deadline.
 
 **Fixed:** two repos. `itevi-mlde` (private, project) and
-`<username>-mlde-learning` (public-safe, portfolio). Linked by date, never by
-import.
+`itevi-notes` (private Obsidian vault, working memory). Split on artifact vs.
+process, not on IP — see conventions §1.
 
 ### H3. `IMAGE_DIGEST` as a build arg is not merely wrong, it is impossible
 

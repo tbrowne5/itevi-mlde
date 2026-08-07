@@ -164,32 +164,28 @@ That second command is your image tag. It moves only when the container or its
 shared dependency changes — a Terraform commit must not retag a scorer
 (`conventions.md` §4).
 
-### 2.2 The learning repo — separate, and public-safe
+### 2.2 The notes vault
 
 ```bash
 cd ~/src
-git clone <your-org-or-personal>/<username>-mlde-learning.git
-cd <username>-mlde-learning
-printf '# Learning log\n\n## 2026-08-04 (Tue, Week 1 Day 1)\n\n' > learning-log.md
-git add learning-log.md && git commit -m "start learning log"
+git clone <your-org>/itevi-notes.git
 ```
 
-**Nothing proprietary goes in this repo — ever.** No sequences, no unpublished
-results, no wet-lab data. It holds narrative, concepts, timings, and sanitised
-snippets. The project brief requires clean commercial IP and Week 21 schedules a
-public write-up "if IP allows"; keeping the two apart from day one means that
-decision is never a scrubbing exercise. Cross-reference by date, never by import.
+An Obsidian vault with git on — a notes folder, not a second codebase. Open it as
+a vault on the **Mac**; on the server it exists only so the `note` shell function
+can append to today's entry. Setup is in its own README and takes five minutes.
 
-Wire the secret scanner into **both**:
+Wire the secret scanner into **both** repos:
 
 ```bash
-pip install --user pre-commit detect-secrets
-cat > .pre-commit-config.yaml <<'EOF'
+cd ~/src/itevi-mlde
+pip install --user pre-commit
+cat > .pre-commit-config.yaml <<'PRECOMMIT'
 repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.4
     hooks: [{id: gitleaks}]
-EOF
+PRECOMMIT
 pre-commit install && pre-commit run --all-files
 ```
 
@@ -200,8 +196,8 @@ cd ~/src/itevi-mlde
 ./scripts/doctor.sh || true      # expect FAILs — this is the "before" picture
 ```
 
-**GATE 2** — both repos cloned, `pre-commit` installed in each, and you have
-saved `doctor.sh`'s failing output. The diff against Phase 11 is your evidence
+**GATE 2** — both repos cloned, `pre-commit` installed in `itevi-mlde`, and you
+have saved `doctor.sh`'s failing output. The diff against Phase 11 is your evidence
 the setup worked.
 
 ---
@@ -945,7 +941,7 @@ Finding that now is worth an hour; finding it in the Week 3 memo is not.
 ### 18.3 Week 1 acceptance
 
 - [ ] `./scripts/doctor.sh` → 0 FAIL
-- [ ] Both repos exist, `pre-commit` installed in each, four daily learning-log entries
+- [ ] Both repos exist, `pre-commit` installed in each, layer-cache spike written up
 - [ ] Parent sequence validated; catalytic residues at the expected indices
 - [ ] `library.yaml` complete; **position-39 polarity reconciled against the paper**
 - [ ] Naive vs multi-stage image sizes recorded; six build timings logged
